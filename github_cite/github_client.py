@@ -6,7 +6,7 @@ from aiohttp.client_exceptions import ClientResponseError
 import requests
 from datetime import datetime
 
-from exceotions import GithubException
+from exceptions import GithubException
 
 class GithubClient:
   """

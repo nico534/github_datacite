@@ -1,5 +1,5 @@
 from citation_translator import GithubRepoDataCite
-from exceotions import GithubException
+from exceptions import GithubException
 import argparse
 import sys
 

@@ -3,7 +3,7 @@ from flask import Flask, request
 from flask_cors import CORS
 from citation_translator import GithubRepoDataCite
 import sys
-from exceotions import GithubException
+from exceptions import GithubException
 
 app = Flask(__name__)
 port = 80
