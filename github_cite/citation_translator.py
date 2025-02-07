@@ -35,38 +35,73 @@ class GithubRepoDataCite:
     self.root = self.doc.createElement('resource')
     self.doc.appendChild(self.root)
     self.__add_base_data__(self.root)
-    if self.__get__data__('repository', 'parent') != None:
-      # Add related identifier in the fork context
-      relatedIdentifiers = self.doc.createElement('relatedIdentifiers')
-      forkIdentifier = self.doc.createElement("relatedIdentifier")
-      forkIdentifier.setAttribute("relatedIdentifierType", "URL")
-      forkIdentifier.setAttribute("relationType", "IsDerivedFrom")
-      parentUrl = f"https://github.com/{self.__get__data__('repository', 'parent', 'owner', 'login')}/{self.__get__data__('repository', 'parent', 'name')}"
-      forkIdentifier.appendChild(self.doc.createTextNode(parentUrl))
-      relatedIdentifiers.appendChild(forkIdentifier)
-      self.root.appendChild(relatedIdentifiers)
-      
-      if self.__get__data__('repository','parent', 'isArchived') != None:
-        archived = "false"
-      else:
-        archived = "true"
-      # find last release befor commit
-      currentRef = self.__get__data__("repository", "defaultBranchRef", "prefix") + self.__get__data__("repository", "defaultBranchRef", "name")
-      parentRef = self.__get__data__("repository", "parent", "defaultBranchRef", "prefix") + self.__get__data__("repository", "parent", "defaultBranchRef", "name")
-      lastCommonCommit = self.client.get_last_common_commit(currentRef, parentRef)
-      if lastCommonCommit != None:
-        # Get last common release
-        releaseAfetCommit = self.client.get_last_parent_release_before(lastCommonCommit["committedDate"])
 
-        versionIdentifier = self.doc.createElement("relatedIdentifier")
-        versionIdentifier.setAttribute("relatedIdentifierType", "URL")
-        versionIdentifier.setAttribute("relationType", "HasVersion")
-        # relatedIdentifier.setAttribute("archived", archived)
+    relatedIdentifiers = self.doc.createElement('relatedIdentifiers')
 
-        relatedIdentifierUrl = f"https://github.com/{self.__get__data__('repository', 'parent', 'owner', 'login')}/{self.__get__data__('repository', 'parent', 'name')}/releases/tag/{releaseAfetCommit['tag_name']}"
+    # Add release identifiers
+    for release in reversed(self.client.list_releases()): # reversed so the newest are at the top
+      releaseIdentifier = self.doc.createElement('relatedIdentifier')
+      releaseIdentifier.setAttribute("relatedIdentifierType", "URL")
+      releaseIdentifier.setAttribute("relationType", "HasVersion")
+      releaseIdentifier.appendChild(self.doc.createTextNode(f"{self.client.githubRepoUrl}/releases/tag/{release["tag_name"]}"))
+      relatedIdentifiers.appendChild(releaseIdentifier)
 
-        versionIdentifier.appendChild(self.doc.createTextNode(relatedIdentifierUrl))
-        relatedIdentifiers.appendChild(versionIdentifier)
+    # Add branch identifiers
+    for branch in self.client.list_branches():
+      branchIdentifier = self.doc.createElement('relatedIdentifier')
+      branchIdentifier.setAttribute("relatedIdentifierType", "URL")
+      branchIdentifier.setAttribute("relationType", "IsVariantFormOf")
+      branchIdentifier.appendChild(self.doc.createTextNode(f"{self.client.githubRepoUrl}/tree/{branch["name"]}"))
+      relatedIdentifiers.appendChild(branchIdentifier)
+
+    self.__add_parent_related_identifiers__(relatedIdentifiers)
+
+    self.root.appendChild(relatedIdentifiers)
+
+    creators = self.doc.createElement("creators")
+    self.__add_creators__(creators)
+    self.root.appendChild(creators)
+
+  def __add_parent_related_identifiers__(self, relatedIdentifiers: Element):
+    if self.__get__data__('parent') == None:
+      return
+    
+    # Add related identifier in the fork context
+    forkIdentifier = self.doc.createElement("relatedIdentifier")
+    forkIdentifier.setAttribute("relatedIdentifierType", "URL")
+    forkIdentifier.setAttribute("relationType", "IsDerivedFrom")
+    parentUrl = self.client.githubParentRepoUrl
+    forkIdentifier.appendChild(self.doc.createTextNode(parentUrl))
+    relatedIdentifiers.appendChild(forkIdentifier)
+
+    # find last release befor commit
+    currentRef = self.__get__data__("defaultBranchRef", "prefix") + self.__get__data__("defaultBranchRef", "name")
+    parentRef = self.__get__data__("parent", "defaultBranchRef", "prefix") + self.__get__data__("parent", "defaultBranchRef", "name")
+    lastCommonCommit = self.client.get_last_common_commit(currentRef, parentRef)
+    if lastCommonCommit == None:
+      return
+
+    # Add commit as related identifier
+    lastCommonCommitIdentifier = self.doc.createElement("relatedIdentifier")
+    lastCommonCommitIdentifier.setAttribute("relatedIdentifierType", "URL")
+    lastCommonCommitIdentifier.setAttribute("relationType", "IsDerivedFrom")
+    lastCommonCommitIdentifier.appendChild(self.doc.createTextNode(f"{self.client.githubParentRepoUrl}/commit/{lastCommonCommit["oid"]}"))
+    relatedIdentifiers.appendChild(lastCommonCommitIdentifier)
+
+    # Get last common release
+    forkedRelease = self.client.get_last_parent_release_before(lastCommonCommit["committedDate"])
+    if forkedRelease == None:
+      return
+
+    versionIdentifier = self.doc.createElement("relatedIdentifier")
+    versionIdentifier.setAttribute("relatedIdentifierType", "URL")
+    versionIdentifier.setAttribute("relationType", "IsDerivedFrom")
+    # relatedIdentifier.setAttribute("archived", archived)
+
+    relatedIdentifierUrl = f"https://github.com/{self.__get__data__('parent', 'owner', 'login')}/{self.__get__data__('parent', 'name')}/releases/tag/{forkedRelease['tag_name']}"
+
+    versionIdentifier.appendChild(self.doc.createTextNode(relatedIdentifierUrl))
+    relatedIdentifiers.appendChild(versionIdentifier)
 
   def __add_base_data__(self, resourceElement: Element):
     """Add basic information to the resource element"""
@@ -88,35 +123,35 @@ class GithubRepoDataCite:
 
     # For now use last pushed data as publicationYear, to be changed in specification
     publicationYear = self.doc.createElement("publicationYear")
-    publicationYear.appendChild(self.doc.createTextNode(self.__get__data__('repository', 'pushedAt')[:4]))
+    publicationYear.appendChild(self.doc.createTextNode(self.__get__data__('pushedAt')[:4]))
     resourceElement.appendChild(publicationYear)
 
     # Add base-repo identifier
     identifier = self.doc.createElement("identifier")
     identifier.setAttribute("identifierType", "URL")
-    identifier.appendChild(self.doc.createTextNode(self.__get__data__('repository', 'url')))
+    identifier.appendChild(self.doc.createTextNode(self.__get__data__('url')))
     resourceElement.appendChild(identifier)
 
     # Add title
     titles = self.doc.createElement("titles")
     title = self.doc.createElement("title")
-    title.appendChild(self.doc.createTextNode(self.__get__data__('repository', 'name')))
+    title.appendChild(self.doc.createTextNode(self.__get__data__('name')))
     titles.appendChild(title)
 
     # subtitle
     subtitle = self.doc.createElement("title")
     subtitle.setAttribute("titleType", "Subtitle")
-    subtitle.appendChild(self.doc.createTextNode(self.__get__data__("repository", "description")))
+    subtitle.appendChild(self.doc.createTextNode(self.__get__data__("description")))
     titles.appendChild(subtitle)
     resourceElement.appendChild(titles)
 
     # Add licence
     rightsList = self.doc.createElement("rightsList")
     license = self.doc.createElement("rights")
-    license.setAttribute("rightsURI", self.__get__data__("repository", "licenseInfo", "url"))
+    license.setAttribute("rightsURI", self.__get__data__("licenseInfo", "url"))
     license.setAttribute("rightsIdentifierScheme", "spdx")
-    license.setAttribute("rightsIdentifier", self.__get__data__("repository", "licenseInfo", "spdxId"))
-    license.appendChild(self.doc.createTextNode(self.__get__data__("repository", "licenseInfo", "name")))
+    license.setAttribute("rightsIdentifier", self.__get__data__("licenseInfo", "spdxId"))
+    license.appendChild(self.doc.createTextNode(self.__get__data__("licenseInfo", "name")))
     rightsList.appendChild(license)
     resourceElement.appendChild(rightsList)
 
@@ -124,16 +159,16 @@ class GithubRepoDataCite:
     dates = self.doc.createElement("dates")
     createdDate = self.doc.createElement("date")
     createdDate.setAttribute("dateType", "Created")
-    createdDate.appendChild(self.doc.createTextNode(self.__get__data__('repository', 'createdAt')))
+    createdDate.appendChild(self.doc.createTextNode(self.__get__data__('createdAt')))
     dates.appendChild(createdDate)
 
     updatedDate = self.doc.createElement("date")
     updatedDate.setAttribute("dateType", "Updated")
-    updatedDate.appendChild(self.doc.createTextNode(self.__get__data__('repository', 'pushedAt')))
+    updatedDate.appendChild(self.doc.createTextNode(self.__get__data__('pushedAt')))
     dates.appendChild(updatedDate)
     resourceElement.appendChild(dates)
 
-
+  def __add_creators__(self, creators: Element):
     # Add Creator
     def create_creator(c):
       creator = self.doc.createElement("creator")
@@ -157,10 +192,9 @@ class GithubRepoDataCite:
         creator.appendChild(creatorName)
       return creator
     
-    creators = self.doc.createElement("creators")
+    
     for c in self.contributers:
       creators.appendChild(create_creator(c))
-    resourceElement.appendChild(creators)
   
   def __get__data__(self, *path):
     current = self.base_data
