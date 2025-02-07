@@ -1,0 +1,128 @@
+<data>
+    <releases>
+        <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://datacite.org/schema/kernel-4"
+            xsi:schemaLocation="http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4/metadata.xsd">
+            <resourceType resourceTypeGeneral="Software">Software</resourceType>
+            <publisher>Nicolai Hüning</publisher>
+            <publicationYear>2023</publicationYear>
+            <identifier identifierType="URL">https://github.com/nico534/mountains</identifier>
+            <titles>
+                <title>mountains</title>
+                <title titleType="Subtitle">Code to compute the prominence and isolation of
+                    mountains from digital elevation data</title>
+            </titles>
+            <creators>
+                <creator>
+                    <creatorName nameType="Personal">Andrew Kirmse</creatorName>
+                    <givenName>Andrew</givenName>
+                    <familyName>Kirmse</familyName>
+                </creator>
+                <creator>
+                    <creatorName nameType="Personal">Oscar Argudo</creatorName>
+                    <givenName>Oscar</givenName>
+                    <familyName>Argudo</familyName>
+                </creator>
+            </creators>
+            <relatedIdentifiers>
+               <relatedIdentifier relatedIdentifierType="URL" relationType="HasVersion">
+                    https://github.com/akirmse/mountains/releases/tag/V0.0.1
+                </relatedIdentifier>
+            </relatedIdentifiers>
+        </resource>
+    </releases>
+    <branches>
+        <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://datacite.org/schema/kernel-4"
+            xsi:schemaLocation="http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4/metadata.xsd">
+            <resourceType resourceTypeGeneral="Software">Software</resourceType>
+            <publisher>Nicolai Hüning</publisher>
+            <publicationYear>2023</publicationYear>
+            <identifier identifierType="URL">https://github.com/nico534/mountains</identifier>
+            <titles>
+                <title>mountains</title>
+                <title titleType="Subtitle">Code to compute the prominence and isolation of
+                    mountains from digital elevation data</title>
+            </titles>
+            <creators>
+                <creator>
+                    <creatorName nameType="Personal">Andrew Kirmse</creatorName>
+                    <givenName>Andrew</givenName>
+                    <familyName>Kirmse</familyName>
+                </creator>
+                <creator>
+                    <creatorName nameType="Personal">Oscar Argudo</creatorName>
+                    <givenName>Oscar</givenName>
+                    <familyName>Argudo</familyName>
+                </creator>
+            </creators>
+            <relatedIdentifiers>
+               <relatedIdentifier relatedIdentifierType="URL" relationType="IsVariantFormOf">
+                    https://github.com/akirmse/mountains/releases/tag/V0.0.1
+                </relatedIdentifier>
+            </relatedIdentifiers>
+        </resource>
+    </branches>
+    <tags>
+        <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://datacite.org/schema/kernel-4"
+            xsi:schemaLocation="http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4/metadata.xsd">
+            <resourceType resourceTypeGeneral="Software">Software</resourceType>
+            <publisher>Nicolai Hüning</publisher>
+            <publicationYear>2023</publicationYear>
+            <identifier identifierType="URL">https://github.com/nico534/mountains</identifier>
+            <titles>
+                <title>mountains</title>
+                <title titleType="Subtitle">Code to compute the prominence and isolation of
+                    mountains from digital elevation data</title>
+            </titles>
+            <creators>
+                <creator>
+                    <creatorName nameType="Personal">Andrew Kirmse</creatorName>
+                    <givenName>Andrew</givenName>
+                    <familyName>Kirmse</familyName>
+                </creator>
+                <creator>
+                    <creatorName nameType="Personal">Oscar Argudo</creatorName>
+                    <givenName>Oscar</givenName>
+                    <familyName>Argudo</familyName>
+                </creator>
+            </creators>
+            <relatedIdentifiers>
+               <relatedIdentifier relatedIdentifierType="URL" relationType="IsDerivedFrom">
+                    https://github.com/akirmse/mountains/releases/tag/V0.0.2
+                </relatedIdentifier>
+            </relatedIdentifiers>
+        </resource>
+        <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://datacite.org/schema/kernel-4"
+            xsi:schemaLocation="http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4/metadata.xsd">
+            <resourceType resourceTypeGeneral="Software">Software</resourceType>
+            <publisher>Nicolai Hüning</publisher>
+            <publicationYear>2023</publicationYear>
+            <identifier identifierType="URL">https://github.com/nico534/mountains</identifier>
+            <titles>
+                <title>mountains</title>
+                <title titleType="Subtitle">Code to compute the prominence and isolation of
+                    mountains from digital elevation data</title>
+            </titles>
+            <creators>
+                <creator>
+                    <creatorName nameType="Personal">Andrew Kirmse</creatorName>
+                    <givenName>Andrew</givenName>
+                    <familyName>Kirmse</familyName>
+                </creator>
+                <creator>
+                    <creatorName nameType="Personal">Oscar Argudo</creatorName>
+                    <givenName>Oscar</givenName>
+                    <familyName>Argudo</familyName>
+                </creator>
+            </creators>
+            <relatedIdentifiers>
+               <relatedIdentifier relatedIdentifierType="URL" relationType="IsDerivedFrom">
+                    https://github.com/akirmse/mountains/commit/960c2899e1001c25b7a3fd97839d02ff29929850
+                </relatedIdentifier>
+            </relatedIdentifiers>
+        </resource>
+    </tags>
+</data>
