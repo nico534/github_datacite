@@ -1,9 +1,9 @@
-# GithubCite
+# GitHubCite
 
 This program can be used to extract a [DataCite](https://schema.datacite.org/meta/kernel-4.5/) xml from GitHub. It also checks if the repository is a fork and adds specific `relatedIdentifiers`.
 
 ### Usage
-GithubCite implements a simple cli-interface and a REST-API with a web frontend.
+GitHubCite implements a simple cli-interface and a REST-API with a web frontend.
 
 ##### CLI interface
 For the cli interface first install the python dependencies

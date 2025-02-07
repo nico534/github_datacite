@@ -12,6 +12,12 @@ class GithubClient:
   """
   The access point to GitHub to retrieve required information for the DataCite format.
   ...
+    Attributes
+    ----------
+    githubUrl
+      The URL to the Github repository
+    githubRepoUrl
+    githubParentRepoUrl
 
     Methods
     -------
@@ -23,12 +29,12 @@ class GithubClient:
         Returns last common commit between ref and parentRef
       get_last_parent_release_before(self, after_date: str)
         Returns the last release before the given Date from the parent repository
-      fetch_parent_release(self, after: str | None)
+      list_parent_release(self, after: str | None)
         Fetch one page of releases from the parent repository
-      fetch_commits(self, ref: str, after: str | None, parent: bool = False)
+      list_commits(self, ref: str, after: str | None, parent: bool = False)
         Fetch one page of commits
   """
-  def __init__(self, repoOwner: str, repoName: str, githubUrl: str = "https://api.github.com", barerToken: str | None = None):
+  def __init__(self, repoOwner: str, repoName: str, githubApiUrl: str = "https://api.github.com", githubUrl: str = "https://github.com", barerToken: str | None = None):
     """ Constructor
 
     Parameters:
@@ -42,13 +48,18 @@ class GithubClient:
     barerToken: str | None, optional
       GitHub token used for authentication
     """
+
+    self.githubUrl = githubUrl
+    self.githubRepoUrl = f"{githubUrl}/{repoOwner}/{repoName}"
+    self.githubParentRepoUrl = ""
+
     self.rSession = requests.Session()
-    self.restBaseUrl = f"{githubUrl}/repos/{repoOwner}/{repoName}"
+    self.restBaseUrl = f"{githubApiUrl}/repos/{repoOwner}/{repoName}"
     if barerToken and barerToken != "":
-      self.transport = AIOHTTPTransport(url=f"{githubUrl}/graphql", headers={'Authorization': f'Bearer {barerToken}'})
+      self.transport = AIOHTTPTransport(url=f"{githubApiUrl}/graphql", headers={'Authorization': f'Bearer {barerToken}'})
       self.rSession.headers.update({'Authorization': f'Bearer {barerToken}'})
     else:
-      self.transport = AIOHTTPTransport(url=f"{githubUrl}/graphql")
+      self.transport = AIOHTTPTransport(url=f"{githubApiUrl}/graphql")
     self.client = Client(transport=self.transport, fetch_schema_from_transport=True)
     self.repoOwner = repoOwner
     self.repoName = repoName
@@ -145,12 +156,18 @@ class GithubClient:
       }
         """
     )
-
-    return self.__send_request__(query)
+    data = self.__send_request__(query)["repository"]
+    if data["parent"] != None:
+      self.githubParentRepoUrl = f"{self.githubUrl}/{data["parent"]["owner"]["login"]}/{data["parent"]["name"]}"
+    return data
 
 
   def get_contributors(self):
-    """Returns a list of all contributors
+    """
+    Returns
+    -------
+    list
+      A list of all contributors
     """
     r = self.rSession.get(
       f"{self.restBaseUrl}/contributors?sort=contributions"
@@ -177,34 +194,34 @@ class GithubClient:
         commit
           the last common commit
     """
-    history_one = self.fetch_commits(ref, None)
-    history_two = self.fetch_commits(parentRef, None, parent=True)
-    history_one_iter = iter(history_one["nodes"])
-    history_two_iter = iter(history_two["nodes"])
-    history_one_curr = next(history_one_iter)
-    history_two_curr = next(history_two_iter)
-    while history_one_curr["oid"] != history_two_curr["oid"]:
-      if datetime.fromisoformat(history_one_curr["committedDate"]) < datetime.fromisoformat(history_two_curr["committedDate"]):
+    historyOne = self.list_commits(ref, None)
+    historyTwo = self.list_commits(parentRef, None, parent=True)
+    historyOneIter = iter(historyOne["nodes"])
+    historyTwoIter = iter(historyTwo["nodes"])
+    historyOneCurr = next(historyOneIter)
+    historyTwoCurr = next(historyTwoIter)
+    while historyOneCurr["oid"] != historyTwoCurr["oid"]:
+      if datetime.fromisoformat(historyOneCurr["committedDate"]) < datetime.fromisoformat(historyTwoCurr["committedDate"]):
         try:
-          history_two_curr = next(history_two_iter)
+          historyTwoCurr = next(historyTwoIter)
         except StopIteration:
-          if history_two["pageInfo"]["hasNextPage"]:
-            history_two = self.fetch_commits(ref, history_two["pageInfo"]["endCursor"], parent=True)
-            history_two_iter = iter(history_two["nodes"])
-            history_two_curr = next(history_two_iter)
+          if historyTwo["pageInfo"]["hasNextPage"]:
+            historyTwo = self.list_commits(ref, historyTwo["pageInfo"]["endCursor"], parent=True)
+            historyTwoIter = iter(historyTwo["nodes"])
+            historyTwoCurr = next(historyTwoIter)
           else:
             return None
       else:
         try:
-          history_one_curr = next(history_one_iter)
+          historyOneCurr = next(historyOneIter)
         except StopIteration:
-          if history_one["pageInfo"]["hasNextPage"]:
-            history_one = self.fetch_commits(ref, history_one["pageInfo"]["endCursor"])
-            history_one_iter = iter(history_one["nodes"])
-            history_one_curr = next(history_one_iter)
+          if historyOne["pageInfo"]["hasNextPage"]:
+            historyOne = self.list_commits(ref, historyOne["pageInfo"]["endCursor"])
+            historyOneIter = iter(historyOne["nodes"])
+            historyOneCurr = next(historyOneIter)
           else:
             return None
-    return history_one_curr
+    return historyOneCurr
   
   def get_last_parent_release_before(self, after_date: str):
     """Get the las release before the given Date from the parent repository
@@ -224,17 +241,114 @@ class GithubClient:
         release
           The release object
     """
-    releases = self.fetch_parent_release(None)
+    releases = self.list_parent_release(None)
     while True:
       for r in releases["edges"]:
         if datetime.fromisoformat(after_date) < datetime.fromisoformat(r["committedDate"]):
           return r
       if releases["pageInfo"]["hasNextPage"]:
-        releases = self.fetch_parent_release(releases["pageInfo"]["endCursor"])
+        releases = self.list_parent_release(releases["pageInfo"]["endCursor"])
       else:
         return None
+      
+  def list_branches(self):
+    """
+    Lists all branch names from the repository
+    """
+    page = self.__fetch_branch_page__(None)
+    branches = page["nodes"]
+    while page["pageInfo"]["hasNextPage"]:
+      page = self.__fetch_branch_page__(after=page["pageInfo"]["endCursor"])
+      branches = branches + page["nodes"]
+    return branches
+    
+
+  def __fetch_branch_page__(self, after: str | None):
+    query = gql(
+      """
+      query FetchBranches($repoOwner: String!, $repoName: String!, $after: String){
+        repository (owner: $repoOwner, name: $repoName) {
+          refs(refPrefix:"refs/heads/", first: 100, after: $after){
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            nodes {
+              name
+            }
+          }
+        }
+      }
+    """
+    )
+    options = None
+    if after != None:
+      options = {"after": after}
+    return self.__send_request__(query, options)["repository"]["refs"]
   
-  def fetch_parent_release(self, after: str | None):
+
+  def list_releases(self):
+    """
+    List all releases from the repository.
+    
+    Returns
+    -------
+    A list of releases. 
+    
+    A release object will look like this (json format):
+    {
+      "release_name": str,
+      "tag_name": str,
+      "committedDate": str,
+      "oid": str
+
+    }
+    """
+    releasePage = self.__fetch_releases__(None)
+    releases = releasePage["edges"]
+    while(releasePage["pageInfo"]["hasNextPage"]):
+      releasePage = self.__fetch_releases__(releasePage["pageInfo"]["endCursor"])
+      releases = releases + releasePage["edges"]
+    return releases
+      
+  def __fetch_releases__(self, after: str | None):
+    query = gql(
+      """
+      query FetchRelease($repoOwner: String!, $repoName: String!, $after: String){
+        repository (owner: $repoOwner, name: $repoName) {
+          releases (first: 100, after: $after, orderBy: {field: CREATED_AT, direction: ASC} ){
+            pageInfo {
+              endCursor
+              hasNextPage
+            } 
+            edges {
+              node {
+                name
+                tag {
+                  name
+                  target {
+                    ... on Commit {
+                      committedDate
+                      oid
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    """
+    )
+    options = None
+    if after:
+      options = {"after": after}
+    resp = self.__send_request__(query, options)
+    resp = resp["repository"]["releases"]
+    resp["edges"] = list(map(lambda a: {"release_name": a["node"]["name"], "tag_name": a["node"]["tag"]["name"], "committedDate": a["node"]["tag"]["target"]["committedDate"], "oid": a["node"]["tag"]["target"]["oid"]}, resp["edges"]))
+    return resp
+  
+  def list_parent_release(self, after: str | None):
     """Fetch one page of releases from the parent repository
     
       Parameters
@@ -287,10 +401,10 @@ class GithubClient:
       options = {"after": after}
     resp = self.__send_request__(query, options)
     resp = resp["repository"]["parent"]["releases"]
-    resp["edges"] = map(lambda a: {"release_name": a["node"]["name"], "tag_name": a["node"]["tag"]["name"], "committedDate": a["node"]["tag"]["target"]["committedDate"], "oid": a["node"]["tag"]["target"]["oid"]}, resp["edges"])
+    resp["edges"] = list(map(lambda a: {"release_name": a["node"]["name"], "tag_name": a["node"]["tag"]["name"], "committedDate": a["node"]["tag"]["target"]["committedDate"], "oid": a["node"]["tag"]["target"]["oid"]}, resp["edges"]))
     return resp
 
-  def fetch_commits(self, ref: str, after: str | None, parent: bool = False):
+  def list_commits(self, ref: str, after: str | None, parent: bool = False):
     """Fetch one page of commits
 
       Parameters
