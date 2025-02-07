@@ -19,7 +19,7 @@ def add_country():
     if request.is_json:
         metadata = request.get_json()
         try:
-            repo_data = GithubRepoDataCite(metadata["owner"], metadata["project"], metadata["apiToken"])
+            repo_data = GithubRepoDataCite(metadata["owner"], metadata["project"], barerToken=metadata["apiToken"])
             xml = repo_data.doc.toprettyxml()
             return xml, 201
         except GithubException as e:

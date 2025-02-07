@@ -10,7 +10,7 @@ class GithubRepoDataCite:
       pretty_xml()
         Returns the DataCite XML document in pretty format.
   """
-  def __init__(self, repoOwner: str, repoName: str, barerToken: str | None = None):
+  def __init__(self, repoOwner: str, repoName: str, githubApiUrl: str = "https://api.github.com", githubUrl: str = "https://github.com", barerToken: str | None = None):
     """ Constructor, will create the dataCite format
 
       Parameters
