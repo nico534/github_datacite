@@ -156,9 +156,9 @@ class GithubClient:
       }
         """
     )
-    data = self.__send_request__(query)["repository"]
-    if data["parent"] != None:
-      self.githubParentRepoUrl = f"{self.githubUrl}/{data["parent"]["owner"]["login"]}/{data["parent"]["name"]}"
+    data = self.__send_request__(query)['repository']
+    if data['parent'] != None:
+      self.githubParentRepoUrl = f"{self.githubUrl}/{data['parent']['owner']['login']}/{data['parent']['name']}"
     return data
 
 
@@ -196,18 +196,18 @@ class GithubClient:
     """
     historyOne = self.list_commits(ref, None)
     historyTwo = self.list_commits(parentRef, None, parent=True)
-    historyOneIter = iter(historyOne["nodes"])
-    historyTwoIter = iter(historyTwo["nodes"])
+    historyOneIter = iter(historyOne['nodes'])
+    historyTwoIter = iter(historyTwo['nodes'])
     historyOneCurr = next(historyOneIter)
     historyTwoCurr = next(historyTwoIter)
-    while historyOneCurr["oid"] != historyTwoCurr["oid"]:
-      if datetime.fromisoformat(historyOneCurr["committedDate"]) < datetime.fromisoformat(historyTwoCurr["committedDate"]):
+    while historyOneCurr['oid'] != historyTwoCurr['oid']:
+      if datetime.fromisoformat(historyOneCurr['committedDate']) < datetime.fromisoformat(historyTwoCurr['committedDate']):
         try:
           historyTwoCurr = next(historyTwoIter)
         except StopIteration:
-          if historyTwo["pageInfo"]["hasNextPage"]:
-            historyTwo = self.list_commits(ref, historyTwo["pageInfo"]["endCursor"], parent=True)
-            historyTwoIter = iter(historyTwo["nodes"])
+          if historyTwo['pageInfo']['hasNextPage']:
+            historyTwo = self.list_commits(ref, historyTwo['pageInfo']['endCursor'], parent=True)
+            historyTwoIter = iter(historyTwo['nodes'])
             historyTwoCurr = next(historyTwoIter)
           else:
             return None
@@ -215,9 +215,9 @@ class GithubClient:
         try:
           historyOneCurr = next(historyOneIter)
         except StopIteration:
-          if historyOne["pageInfo"]["hasNextPage"]:
-            historyOne = self.list_commits(ref, historyOne["pageInfo"]["endCursor"])
-            historyOneIter = iter(historyOne["nodes"])
+          if historyOne['pageInfo']['hasNextPage']:
+            historyOne = self.list_commits(ref, historyOne['pageInfo']['endCursor'])
+            historyOneIter = iter(historyOne['nodes'])
             historyOneCurr = next(historyOneIter)
           else:
             return None
@@ -243,11 +243,11 @@ class GithubClient:
     """
     releases = self.list_parent_release(None)
     while True:
-      for r in releases["edges"]:
-        if datetime.fromisoformat(after_date) < datetime.fromisoformat(r["committedDate"]):
+      for r in releases['edges']:
+        if datetime.fromisoformat(after_date) < datetime.fromisoformat(r['committedDate']):
           return r
-      if releases["pageInfo"]["hasNextPage"]:
-        releases = self.list_parent_release(releases["pageInfo"]["endCursor"])
+      if releases['pageInfo']['hasNextPage']:
+        releases = self.list_parent_release(releases['pageInfo']['endCursor'])
       else:
         return None
       
@@ -256,10 +256,10 @@ class GithubClient:
     Lists all branch names from the repository
     """
     page = self.__fetch_branch_page__(None)
-    branches = page["nodes"]
-    while page["pageInfo"]["hasNextPage"]:
-      page = self.__fetch_branch_page__(after=page["pageInfo"]["endCursor"])
-      branches = branches + page["nodes"]
+    branches = page['nodes']
+    while page['pageInfo']['hasNextPage']:
+      page = self.__fetch_branch_page__(after=page['pageInfo']['endCursor'])
+      branches = branches + page['nodes']
     return branches
     
 
@@ -284,7 +284,7 @@ class GithubClient:
     options = None
     if after != None:
       options = {"after": after}
-    return self.__send_request__(query, options)["repository"]["refs"]
+    return self.__send_request__(query, options)['repository']['refs']
   
 
   def list_releases(self):
@@ -305,10 +305,10 @@ class GithubClient:
     }
     """
     releasePage = self.__fetch_releases__(None)
-    releases = releasePage["edges"]
-    while(releasePage["pageInfo"]["hasNextPage"]):
-      releasePage = self.__fetch_releases__(releasePage["pageInfo"]["endCursor"])
-      releases = releases + releasePage["edges"]
+    releases = releasePage['edges']
+    while(releasePage['pageInfo']['hasNextPage']):
+      releasePage = self.__fetch_releases__(releasePage['pageInfo']['endCursor'])
+      releases = releases + releasePage['edges']
     return releases
       
   def __fetch_releases__(self, after: str | None):
@@ -344,8 +344,8 @@ class GithubClient:
     if after:
       options = {"after": after}
     resp = self.__send_request__(query, options)
-    resp = resp["repository"]["releases"]
-    resp["edges"] = list(map(lambda a: {"release_name": a["node"]["name"], "tag_name": a["node"]["tag"]["name"], "committedDate": a["node"]["tag"]["target"]["committedDate"], "oid": a["node"]["tag"]["target"]["oid"]}, resp["edges"]))
+    resp = resp['repository']['releases']
+    resp['edges'] = list(map(lambda a: {"release_name": a['node']['name'], 'tag_name': a['node']['tag']['name'], 'committedDate': a['node']['tag']['target']['committedDate'], 'oid': a['node']['tag']['target']['oid']}, resp['edges']))
     return resp
   
   def list_parent_release(self, after: str | None):
@@ -400,8 +400,8 @@ class GithubClient:
     if after:
       options = {"after": after}
     resp = self.__send_request__(query, options)
-    resp = resp["repository"]["parent"]["releases"]
-    resp["edges"] = list(map(lambda a: {"release_name": a["node"]["name"], "tag_name": a["node"]["tag"]["name"], "committedDate": a["node"]["tag"]["target"]["committedDate"], "oid": a["node"]["tag"]["target"]["oid"]}, resp["edges"]))
+    resp = resp['repository']['parent']['releases']
+    resp['edges'] = list(map(lambda a: {"release_name": a['node']['name'], "tag_name": a['node']['tag']['name'], "committedDate": a['node']['tag']['target']['committedDate'], "oid": a['node']['tag']['target']['oid']}, resp['edges']))
     return resp
 
   def list_commits(self, ref: str, after: str | None, parent: bool = False):
@@ -481,8 +481,8 @@ class GithubClient:
       "ref": ref
     }
     if after:
-      options["after"] = after
-    resp = self.__send_request__(query, options)["repository"]
+      options['after'] = after
+    resp = self.__send_request__(query, options)['repository']
     if parent:
-      resp = resp["parent"]
-    return resp["ref"]["target"]["history"]
+      resp = resp['parent']
+    return resp['ref']['target']['history']

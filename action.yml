@@ -10,6 +10,12 @@ inputs:
   apiToken:
     description: "The API token to access GitHubs APIs"
     required: true
+  githubUrl:
+    description: "The URL to the GitHub instance"
+    default: "https://github.com"
+  githubApiUrl:
+    description: "Url to the GitHub API."
+    default: "https://api.github.com"
 outputs:
   dataCiteXML:
     description: 'The DataCite XML file'

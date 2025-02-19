@@ -85,11 +85,11 @@ class GithubRepoDataCite:
     lastCommonCommitIdentifier = self.doc.createElement("relatedIdentifier")
     lastCommonCommitIdentifier.setAttribute("relatedIdentifierType", "URL")
     lastCommonCommitIdentifier.setAttribute("relationType", "IsDerivedFrom")
-    lastCommonCommitIdentifier.appendChild(self.doc.createTextNode(f"{self.client.githubParentRepoUrl}/commit/{lastCommonCommit["oid"]}"))
+    lastCommonCommitIdentifier.appendChild(self.doc.createTextNode(f"{self.client.githubParentRepoUrl}/commit/{lastCommonCommit['oid']}"))
     relatedIdentifiers.appendChild(lastCommonCommitIdentifier)
 
     # Get last common release
-    forkedRelease = self.client.get_last_parent_release_before(lastCommonCommit["committedDate"])
+    forkedRelease = self.client.get_last_parent_release_before(lastCommonCommit['committedDate'])
     if forkedRelease == None:
       return
 
