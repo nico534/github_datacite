@@ -7,4 +7,4 @@ WORKDIR /github_cite
 
 RUN pip install --target=/github_cite -r requirements-minimal.txt
 
-CMD [ "python3", "action.py" ]
+CMD [ "python3", "/github_cite/action.py" ]
