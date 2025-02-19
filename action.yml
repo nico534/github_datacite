@@ -17,7 +17,7 @@ inputs:
     description: "Url to the GitHub API."
     default: "https://api.github.com"
 outputs:
-  dataCiteXML:
+  datacitexml:
     description: 'The DataCite XML file'
 runs:
   using: 'docker'
