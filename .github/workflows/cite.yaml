@@ -1,14 +1,18 @@
 name: Create GitHub DataCite xml file
 on:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+  #   push:
+  #     tags:
+  #       - 'v[0-9]+.[0-9]+.[0-9]+'
 jobs:
   createCite:
     name: Create a DataCite XML
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        name: Checkout repository
+        with:
+          ref: main
       - name: Extract repoOwner and repoName
         run: |
           REPO_FULL_NAME="${{ github.repository }}"
@@ -34,7 +38,6 @@ jobs:
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout --track origin/main
           git add data-cite.xml
-          git commit -m "Add data-cite file"
+          git commit -m "Add data-cite.xml file"
           git push
