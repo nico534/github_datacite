@@ -34,7 +34,7 @@ jobs:
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout main
+          git checkout --track origin/main
           git add data-cite.xml
           git commit -m "Add data-cite file"
           git push
