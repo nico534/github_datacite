@@ -1,23 +1,46 @@
-# GitHubCite
+# GitHub DataCite action
 
-This program can be used to extract a [DataCite](https://schema.datacite.org/meta/kernel-4.5/) xml from GitHub. It also checks if the repository is a fork and adds specific `relatedIdentifiers`.
+Action to generate DataCite xml from a GitHub repository.
 
-### Usage
-GitHubCite implements a simple cli-interface and a REST-API with a web frontend.
+Example usage in workflows:
+```yaml
+name: Create GitHub DataCite xml file
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+jobs:
+  createCite:
+    name: Create a DataCite XML
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract repoOwner and repoName
+        run: |
+          REPO_FULL_NAME="${{ github.repository }}"
+          REPO_OWNER=$(echo "$REPO_FULL_NAME" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO_FULL_NAME" | cut -d'/' -f2)
+          echo "REPO_OWNER=$REPO_OWNER" >> $GITHUB_ENV
+          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
 
-##### CLI interface
-For the cli interface first install the python dependencies
-```bash
-cd github_cite
-pip install -r requirements.txt
+      - name: Get DataCite xml file
+        uses: nico534/github_datacite@main
+        id: datacite-xml
+        with:
+          apiToken: ${{ secrets.GITHUB_TOKEN }}
+          repoOwner: ${{ env.REPO_OWNER }}
+          repoName: ${{ env.REPO_NAME }}
+      - name: Create data-cite xml file
+        uses: 1arp/create-a-file-action@0.4.5
+        with:
+          file: "data-cite.xml"
+          content: ${{ steps.datacite-xml.outputs.datacitexml }}
+
+      - name: Commit file
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add data-cite.xml
+          git commit -m "Add data-cite file"
+          git push
 ```
-
-Now run `python cli.py repoUser repoName -t githubToken` to get the DataCite xml.
-
-##### Frontend
-To start the REST-API and frontend using docker compose simply run
-```bash
-docker compose up -d
-```
-
-The frontend will be available at [http://localhost:3000](http://localhost:3000)..

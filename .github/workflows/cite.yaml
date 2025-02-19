@@ -1,8 +1,8 @@
 name: Create GitHub DataCite xml file
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 jobs:
   createCite:
     name: Create a DataCite XML
@@ -30,3 +30,10 @@ jobs:
           file: "data-cite.xml"
           content: ${{ steps.datacite-xml.outputs.datacitexml }}
 
+      - name: Commit file
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add data-cite.xml
+          git commit -m "Add data-cite file"
+          git push
