@@ -41,3 +41,5 @@ jobs:
           git add data-cite.xml
           git commit -m "Add data-cite.xml file"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
