@@ -43,7 +43,7 @@ class GithubRepoDataCite:
       releaseIdentifier = self.doc.createElement('relatedIdentifier')
       releaseIdentifier.setAttribute("relatedIdentifierType", "URL")
       releaseIdentifier.setAttribute("relationType", "HasVersion")
-      releaseIdentifier.appendChild(self.doc.createTextNode(f"{self.client.githubRepoUrl}/releases/tag/{release["tag_name"]}"))
+      releaseIdentifier.appendChild(self.doc.createTextNode(f"{self.client.githubRepoUrl}/releases/tag/{release['tag_name']}"))
       relatedIdentifiers.appendChild(releaseIdentifier)
 
     # Add branch identifiers
@@ -51,7 +51,7 @@ class GithubRepoDataCite:
       branchIdentifier = self.doc.createElement('relatedIdentifier')
       branchIdentifier.setAttribute("relatedIdentifierType", "URL")
       branchIdentifier.setAttribute("relationType", "IsVariantFormOf")
-      branchIdentifier.appendChild(self.doc.createTextNode(f"{self.client.githubRepoUrl}/tree/{branch["name"]}"))
+      branchIdentifier.appendChild(self.doc.createTextNode(f"{self.client.githubRepoUrl}/tree/{branch['name']}"))
       relatedIdentifiers.appendChild(branchIdentifier)
 
     self.__add_parent_related_identifiers__(relatedIdentifiers)
