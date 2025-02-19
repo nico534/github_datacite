@@ -146,14 +146,20 @@ class GithubRepoDataCite:
     resourceElement.appendChild(titles)
 
     # Add licence
-    rightsList = self.doc.createElement("rightsList")
-    license = self.doc.createElement("rights")
-    license.setAttribute("rightsURI", self.__get__data__("licenseInfo", "url"))
-    license.setAttribute("rightsIdentifierScheme", "spdx")
-    license.setAttribute("rightsIdentifier", self.__get__data__("licenseInfo", "spdxId"))
-    license.appendChild(self.doc.createTextNode(self.__get__data__("licenseInfo", "name")))
-    rightsList.appendChild(license)
-    resourceElement.appendChild(rightsList)
+    licenceName = self.__get__data__("licenseInfo", "name")
+    if licenceName != None:
+      rightsList = self.doc.createElement("rightsList")
+      license = self.doc.createElement("rights")
+      licenceUrl = self.__get__data__("licenseInfo", "url")
+      if licenceUrl != None:
+        license.setAttribute("rightsURI", licenceUrl)
+      license.setAttribute("rightsIdentifierScheme", "spdx")
+      licenceId = self.__get__data__("licenseInfo", "spdxId")
+      if licenceId != None:
+        license.setAttribute("rightsIdentifier", licenceId)
+      license.appendChild(self.doc.createTextNode(licenceName))
+      rightsList.appendChild(license)
+      resourceElement.appendChild(rightsList)
 
     # Add dates
     dates = self.doc.createElement("dates")
@@ -199,7 +205,10 @@ class GithubRepoDataCite:
   def __get__data__(self, *path):
     current = self.base_data
     for step in path:
-      current = current[step]
+      if current != None and step in current:
+        current = current[step]
+      else:
+        return None
     return current
   
   def pretty_xml(self):
