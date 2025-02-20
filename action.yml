@@ -21,4 +21,4 @@ outputs:
     description: 'The DataCite XML file'
 runs:
   using: 'docker'
-  image: 'ghcr.io/nico534/github_datacite/github-datacite-action:v1.0.0'
+  image: 'docker://ghcr.io/nico534/github_datacite/github-datacite-action:v1.0.0'
