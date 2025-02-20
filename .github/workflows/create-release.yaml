@@ -5,7 +5,7 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/github-datacite
+  IMAGE_NAME: ${{ github.repository }}/github-datacite-action
 jobs:
   buildDockerImage:
     runs-on: ubuntu-latest
