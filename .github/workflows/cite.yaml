@@ -8,6 +8,10 @@ jobs:
   createCite:
     name: Create a DataCite XML
     runs-on: ubuntu-latest
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
+      contents: write
     steps:
       - uses: actions/checkout@v4
         name: Checkout repository
@@ -39,3 +43,4 @@ jobs:
         with:
           commit_message: Automatically added data-cite.xml
           file_pattern: 'data-cite.xml'
+          branch: main
