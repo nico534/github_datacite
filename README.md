@@ -1,20 +1,31 @@
 # GitHub DataCite action
 
-Action to generate DataCite xml from a GitHub repository.
+GitHub action to generate DataCite xml from a GitHub repository.
+
+Usage
 
 Example usage in workflows:
 ```yaml
 name: Create GitHub DataCite xml file
 on:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+
 jobs:
   createCite:
     name: Create a DataCite XML
     runs-on: ubuntu-latest
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
+      contents: write
     steps:
+      # Checkout the repository
       - uses: actions/checkout@v4
+        name: Checkout repository
+        with:
+          ref: main
+
+      # Seperate repository owner and name
       - name: Extract repoOwner and repoName
         run: |
           REPO_FULL_NAME="${{ github.repository }}"
@@ -23,6 +34,7 @@ jobs:
           echo "REPO_OWNER=$REPO_OWNER" >> $GITHUB_ENV
           echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
 
+      # Generate the DataCite xml file
       - name: Get DataCite xml file
         uses: nico534/github_datacite@main
         id: datacite-xml
@@ -30,17 +42,19 @@ jobs:
           apiToken: ${{ secrets.GITHUB_TOKEN }}
           repoOwner: ${{ env.REPO_OWNER }}
           repoName: ${{ env.REPO_NAME }}
+
+      # Save the DataCite XML to a file
       - name: Create data-cite xml file
         uses: 1arp/create-a-file-action@0.4.5
         with:
           file: "data-cite.xml"
           content: ${{ steps.datacite-xml.outputs.datacitexml }}
 
-      - name: Commit file
-        run: |
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git add data-cite.xml
-          git commit -m "Add data-cite file"
-          git push
+      # Commit the file to the main branch
+      - name: Commit and push data-cite.xml to the repository
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Automatically added data-cite.xml
+          file_pattern: 'data-cite.xml'
+          branch: main
 ```
