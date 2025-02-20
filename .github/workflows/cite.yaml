@@ -32,11 +32,19 @@ jobs:
           apiToken: ${{ secrets.GITHUB_TOKEN }}
           repoOwner: ${{ env.REPO_OWNER }}
           repoName: ${{ env.REPO_NAME }}
+
       - name: Create data-cite xml file
         uses: 1arp/create-a-file-action@0.4.5
         with:
           file: "data-cite.xml"
           content: ${{ steps.datacite-xml.outputs.datacitexml }}
+
+      - name: Save data-cite.xml as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-cite-xml
+          path: data-cite.xml
+          compression-level: 0
 
       - name: Commit and push data-cite.xml to the repository
         uses: stefanzweifel/git-auto-commit-action@v5
