@@ -2,9 +2,18 @@
 
 GitHub action to generate DataCite xml from a GitHub repository.
 
-Usage
+## Usage
+Available inputs:
+- `repoOwner` The owner of the repository
+- `repoName` The name of the repository
+- `apiToken` The API token to access GitHubs API
+- `githubUrl` URL to the GitHub instance. Default: `https://github.com`
+- `githubApiUrl` URL to the GitHub API. Dafault: `https://api.github.com`
 
-Example usage in workflows:
+This action will generate the DataCite xml and save it in the output `datacitexml`.
+
+## Example
+Example usage to generate a `data-cite.xml` file on the main branch:
 ```yaml
 name: Create GitHub DataCite xml file
 on:
