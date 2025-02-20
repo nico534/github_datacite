@@ -9,7 +9,7 @@ env:
 jobs:
   buildDockerImage:
     runs-on: ubuntu-latest
-    staps:
+    steps:
       - uses: actions/checkout@v4
         name: Checkout repository
 
