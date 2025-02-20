@@ -10,10 +10,10 @@ Available inputs:
 - `githubUrl` URL to the GitHub instance. Default: `https://github.com`
 - `githubApiUrl` URL to the GitHub API. Dafault: `https://api.github.com`
 
-This action will generate the DataCite xml and save it in the output `datacitexml`.
+This action will generate the DataCite xml and save it in the output `datacitexml`. This output can now for example be used as artifact for a GitHub release.
 
 ## Example
-Example usage to generate a `data-cite.xml` file on the main branch:
+Example usage to generate a `data-cite.xml` file on the main branch and as an artifact ready to download:
 ```yaml
 name: Create GitHub DataCite xml file
 on:
@@ -58,6 +58,14 @@ jobs:
         with:
           file: "data-cite.xml"
           content: ${{ steps.datacite-xml.outputs.datacitexml }}
+
+      # Upload to artifact to make it available as download
+      - name: Save data-cite.xml as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-cite-xml
+          path: data-cite.xml
+          compression-level: 0
 
       # Commit the file to the main branch
       - name: Commit and push data-cite.xml to the repository
