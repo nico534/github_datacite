@@ -1,6 +1,6 @@
 # GitHub DataCite action
 
-GitHub action to generate DataCite xml from a GitHub repository.
+GitHub action to generate [DataCite](https://schema.datacite.org/meta/kernel-4.5/) xml from a GitHub repository. It also checks if the repository is a fork and adds specific `relatedIdentifiers`.
 
 ## Usage
 Available inputs:
@@ -45,7 +45,7 @@ jobs:
 
       # Generate the DataCite xml file
       - name: Get DataCite xml file
-        uses: nico534/github_datacite@main
+        uses: nico534/github_datacite@v1
         id: datacite-xml
         with:
           apiToken: ${{ secrets.GITHUB_TOKEN }}
@@ -75,3 +75,22 @@ jobs:
           file_pattern: 'data-cite.xml'
           branch: main
 ```
+
+## Usage beyond GitHub actions
+GitHub DataCite also implements a simple to us python cli-interface and a REST-API that can be used with the provided frontend.
+
+#### CLI interface
+For the cli interface first install the python dependencies
+```bash
+cd github_cite
+pip install -r requirements.txt
+```
+Now run `python cli.py repoUser repoName -t githubToken` to get the DataCite xml.
+
+#### Frontend
+To start the REST-API and frontend using docker compose simply run
+```bash
+docker compose up -d
+```
+
+The frontend will be available at [http://localhost:3000](http://localhost:3000)..

@@ -26,7 +26,7 @@ jobs:
           echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
 
       - name: Get DataCite xml file
-        uses: nico534/github_datacite@main
+        uses: nico534/github_datacite@v1
         id: datacite-xml
         with:
           apiToken: ${{ secrets.GITHUB_TOKEN }}
