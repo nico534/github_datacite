@@ -345,6 +345,7 @@ class GithubClient:
       options = {"after": after}
     resp = self.__send_request__(query, options)
     resp = resp['repository']['releases']
+    resp['edges'] = list(filter(lambda a: 'committedDate' in a['node']['tag']['target'], resp['edges']))
     resp['edges'] = list(map(lambda a: {"release_name": a['node']['name'], 'tag_name': a['node']['tag']['name'], 'committedDate': a['node']['tag']['target']['committedDate'], 'oid': a['node']['tag']['target']['oid']}, resp['edges']))
     return resp
   
